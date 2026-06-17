@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+samples/*
+!samples/.gitkeep
+*.jpg
+*.jpeg
+*.png
+*.webp
+.git/
+.idea/

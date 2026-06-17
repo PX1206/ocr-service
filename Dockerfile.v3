@@ -1,0 +1,13 @@
+# 基于现网 ocr-server:v2 增量构建 v3，仅补头肩照校验所需 Python 依赖。
+# 代码、模型、PaddleDetection 仍走 /data/ai 挂载，与 v2 发布流程一致。
+#
+# 构建：docker build -f Dockerfile.v3 -t ocr-server:v3 .
+# 前提：本机已有 ocr-server:v2 镜像（docker images | grep ocr-server）
+
+FROM ocr-server:v2
+
+COPY requirements-portrait-inference.txt /tmp/requirements-portrait-inference.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-portrait-inference.txt \
+    && rm -f /tmp/requirements-portrait-inference.txt
+
+RUN python -c "import yaml, shapely; print('portrait inference deps ok')"

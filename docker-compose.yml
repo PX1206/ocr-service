@@ -1,0 +1,25 @@
+services:
+  ocr-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nh-ocr-service
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    environment:
+      OCR_PORT: "8088"
+      OCR_LOG_DIR: /data/ai/apps/ocr-service/logs
+      PORTRAIT_ENABLED: "true"
+      PORTRAIT_WARMUP: "false"
+      PORTRAIT_DEVICE: "CPU"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 180s
+    deploy:
+      resources:
+        limits:
+          memory: 6G

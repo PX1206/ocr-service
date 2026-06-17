@@ -1,0 +1,5 @@
+# 头肩照推理专用（勿 pip install paddledet，会污染 OCR 环境的 numpy/opencv）
+# 仅需 PaddleDetection 仓库的 deploy/python + 下方轻量依赖 + 已存在的 paddlepaddle
+PyYAML>=5.1,<6.1
+shapely
+scipy>=1.7,<1.12

@@ -1,0 +1,2 @@
+# 已废弃：会污染 v2 OCR 环境，请勿使用。
+# 请改用 requirements-portrait-inference.txt（PyYAML + shapely + scipy，不装 paddledet）

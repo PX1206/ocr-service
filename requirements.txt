@@ -1,0 +1,12 @@
+paddleocr==2.7.3
+paddlepaddle==2.6.2
+numpy==1.24.4
+opencv-python-headless==4.6.0.66
+Pillow==10.4.0
+PyYAML>=5.1,<6.1
+shapely
+scipy>=1.7,<1.12
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+python-multipart==0.0.20
+# 头肩推理：不要安装 paddledet，见 requirements-portrait-inference.txt 与 docs/PRODUCTION_UPGRADE.md
