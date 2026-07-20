@@ -10,6 +10,7 @@ from app.common.ocr_engine import warmup_ocr
 from app.common.pose_engine import warmup_pose_engine
 from app.parsers.bankcard_parser import parse_bank_card
 from app.parsers.idcard_parser import parse_idcard
+from app.parsers.license_parser import parse_business_license
 from app.parsers.portrait_validator import validate_portrait_image
 
 ALLOWED_SUFFIX = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
@@ -128,6 +129,30 @@ async def validate_portrait(file: UploadFile = File(...)) -> JSONResponse:
     except Exception:
         logger.exception("portrait validate failed")
         return _fail("portrait validate failed")
+    finally:
+        _cleanup(image_path)
+
+
+@app.post("/ocr/business-license")
+async def ocr_business_license(file: UploadFile = File(...)) -> JSONResponse:
+    image_path = None
+    try:
+        image_path = await _save_upload(file)
+        upload_name = file.filename or os.path.basename(image_path)
+        logger.info("business-license request file=%s", upload_name)
+        result = parse_business_license(image_path)
+        logger.info(
+            "business-license response file=%s company_name=%s credit_code=%s",
+            upload_name,
+            result.get("company_name"),
+            (result.get("credit_code") or "")[:4] + "****" if result.get("credit_code") else None,
+        )
+        return _ok(result)
+    except HTTPException as ex:
+        return _fail(str(ex.detail), ex.status_code)
+    except Exception:
+        logger.exception("business-license ocr failed")
+        return _fail("business-license ocr failed")
     finally:
         _cleanup(image_path)
 

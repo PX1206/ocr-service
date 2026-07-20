@@ -66,6 +66,27 @@ def _detect_side(full_text: str, id_match: Optional[re.Match]) -> str:
     return "unknown"
 
 
+def _parse_gender_nation_line(line: str, data: Dict[str, Optional[str]]) -> None:
+    if "性别" in line:
+        gender_part = line.split("民族", 1)[0] if "民族" in line else line
+        value = gender_part.replace("性别", "").strip(" :：")
+        if value in ("男", "女"):
+            data["gender"] = value
+        else:
+            match = re.search(r"[男女]", value)
+            if match:
+                data["gender"] = match.group(0)
+
+    if "民族" in line:
+        idx = line.find("民族")
+        nation_val = line[idx + 2:].strip(" :：")
+        nation_match = re.match(r"([\u4e00-\u9fa5]{1,10})", nation_val)
+        if nation_match:
+            data["nation"] = nation_match.group(1)
+        elif nation_val:
+            data["nation"] = nation_val
+
+
 def _parse_front(texts: List[str], full_text: str, id_match: Optional[re.Match]) -> Dict[str, Optional[str]]:
     data = _empty_result()
     data["side"] = "front"
@@ -74,17 +95,8 @@ def _parse_front(texts: List[str], full_text: str, id_match: Optional[re.Match])
         if "姓名" in line:
             data["name"] = line.replace("姓名", "").strip(" :：")
 
-        elif "性别" in line:
-            value = line.replace("性别", "").strip(" :：")
-            if value in ("男", "女"):
-                data["gender"] = value
-            else:
-                match = re.search(r"[男女]", value)
-                if match:
-                    data["gender"] = match.group(0)
-
-        elif "民族" in line:
-            data["nation"] = line.replace("民族", "").strip(" :：")
+        elif "性别" in line or "民族" in line:
+            _parse_gender_nation_line(line, data)
 
     if id_match:
         data["id_no"] = _normalize_id_number(id_match.group(0))
