@@ -9,6 +9,7 @@ from app.common.logging_config import get_logger, resolve_log_dir
 from app.common.ocr_engine import warmup_ocr
 from app.common.pose_engine import warmup_pose_engine
 from app.parsers.bankcard_parser import parse_bank_card
+from app.parsers.businesscard_parser import parse_business_card
 from app.parsers.idcard_parser import parse_idcard
 from app.parsers.license_parser import parse_business_license
 from app.parsers.portrait_validator import validate_portrait_image
@@ -153,6 +154,33 @@ async def ocr_business_license(file: UploadFile = File(...)) -> JSONResponse:
     except Exception:
         logger.exception("business-license ocr failed")
         return _fail("business-license ocr failed")
+    finally:
+        _cleanup(image_path)
+
+
+@app.post("/ocr/business-card")
+async def ocr_business_card(file: UploadFile = File(...)) -> JSONResponse:
+    image_path = None
+    try:
+        image_path = await _save_upload(file)
+        upload_name = file.filename or os.path.basename(image_path)
+        logger.info("business-card request file=%s", upload_name)
+        result = parse_business_card(image_path)
+        mobile = result.get("mobile") or ""
+        masked_mobile = f"{mobile[:3]}****{mobile[-4:]}" if len(mobile) >= 7 else mobile
+        logger.info(
+            "business-card response file=%s name=%s mobile=%s company=%s",
+            upload_name,
+            result.get("name"),
+            masked_mobile,
+            result.get("company_name"),
+        )
+        return _ok(result)
+    except HTTPException as ex:
+        return _fail(str(ex.detail), ex.status_code)
+    except Exception:
+        logger.exception("business-card ocr failed")
+        return _fail("business-card ocr failed")
     finally:
         _cleanup(image_path)
 
